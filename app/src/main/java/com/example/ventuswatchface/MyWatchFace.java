@@ -12,9 +12,12 @@ import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+
+import androidx.core.content.res.ResourcesCompat;
 import androidx.palette.graphics.Palette;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
@@ -121,7 +124,10 @@ public class MyWatchFace extends CanvasWatchFaceService
         private Paint mSecondPaint;
         private Paint mTickAndCirclePaint;
         private Paint  mBackgroundPaint;
+        private Paint mDigitalTimePaint;
+        private Paint mDigitalStrokePaint;
         private Bitmap mBackgroundBitmap;
+        private Bitmap mBackgroundAmbientBitmap;
         private Bitmap mGrayBackgroundBitmap;
         private boolean mAmbient;
         private boolean mLowBitAmbient;
@@ -147,6 +153,7 @@ public class MyWatchFace extends CanvasWatchFaceService
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor( Color.BLACK );
             mBackgroundBitmap = BitmapFactory.decodeResource( getResources(), R.drawable.ventus );
+            mBackgroundAmbientBitmap = BitmapFactory.decodeResource( getResources(), R.drawable.ventus_ambient );
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from( mBackgroundBitmap ).generate( new Palette.PaletteAsyncListener()
@@ -199,6 +206,21 @@ public class MyWatchFace extends CanvasWatchFaceService
             mTickAndCirclePaint.setAntiAlias( true );
             mTickAndCirclePaint.setStyle( Paint.Style.STROKE );
             mTickAndCirclePaint.setShadowLayer( SHADOW_RADIUS, 0, 0, mWatchHandShadowColor );
+
+            Typeface typeface = ResourcesCompat.getFont( getApplicationContext(), R.font.eurostyle_normal );
+
+            mDigitalTimePaint = new Paint();
+            mDigitalTimePaint.setColor( Color.rgb( 0, 0,0 ) );
+            mDigitalTimePaint.setStyle( Paint.Style.FILL );
+            mDigitalTimePaint.setTextSize( 70 );
+            mDigitalTimePaint.setTypeface( typeface );
+
+            mDigitalStrokePaint = new Paint();
+            mDigitalStrokePaint.setColor( Color.rgb( 157, 200,109 ) );
+            mDigitalStrokePaint.setStyle( Paint.Style.STROKE );
+            mDigitalStrokePaint.setTextSize( 70 );
+            mDigitalStrokePaint.setStrokeWidth( 6 );
+            mDigitalStrokePaint.setTypeface( typeface );
         }
 
         @Override
@@ -243,6 +265,9 @@ public class MyWatchFace extends CanvasWatchFaceService
                 mMinutePaint.setColor( Color.WHITE );
                 mSecondPaint.setColor( Color.WHITE );
                 mTickAndCirclePaint.setColor( Color.WHITE );
+
+                mDigitalTimePaint.setColor( Color.BLACK );
+                mDigitalStrokePaint.setColor( Color.WHITE );
 
                 mHourPaint.setAntiAlias( false );
                 mMinutePaint.setAntiAlias( false );
@@ -319,6 +344,10 @@ public class MyWatchFace extends CanvasWatchFaceService
                     ( int ) ( mBackgroundBitmap.getWidth() * scale ),
                     ( int ) ( mBackgroundBitmap.getHeight() * scale ), true );
 
+            mBackgroundAmbientBitmap = Bitmap.createScaledBitmap( mBackgroundAmbientBitmap,
+                    ( int ) ( mBackgroundAmbientBitmap.getWidth() * scale ),
+                    ( int ) ( mBackgroundAmbientBitmap.getHeight() * scale ), true );
+
             /*
              * Create a gray version of the image only if it will look nice on the device in
              * ambient mode. That means we don't want devices that support burn-in
@@ -338,8 +367,8 @@ public class MyWatchFace extends CanvasWatchFaceService
         private void initGrayBackgroundBitmap()
         {
             mGrayBackgroundBitmap = Bitmap.createBitmap(
-                    mBackgroundBitmap.getWidth(),
-                    mBackgroundBitmap.getHeight(),
+                    mBackgroundAmbientBitmap.getWidth(),
+                    mBackgroundAmbientBitmap.getHeight(),
                     Bitmap.Config.ARGB_8888 );
             Canvas canvas = new Canvas( mGrayBackgroundBitmap );
             Paint grayPaint = new Paint();
@@ -347,7 +376,7 @@ public class MyWatchFace extends CanvasWatchFaceService
             colorMatrix.setSaturation( 0 );
             ColorMatrixColorFilter filter = new ColorMatrixColorFilter( colorMatrix );
             grayPaint.setColorFilter( filter );
-            canvas.drawBitmap( mBackgroundBitmap, 0, 0, grayPaint );
+            canvas.drawBitmap( mBackgroundAmbientBitmap, 0, 0, grayPaint );
         }
 
         /**
@@ -404,6 +433,31 @@ public class MyWatchFace extends CanvasWatchFaceService
 
         private void drawWatchFace( Canvas canvas )
         {
+            int hours = mCalendar.get( Calendar.HOUR );
+            int minutes = mCalendar.get( Calendar.MINUTE );
+            String hourString = "";
+            String minuteString = "";
+
+            if (minutes < 10) {
+                minuteString = "0" + minutes;
+            }
+            else {
+                minuteString = Integer.toString( minutes );
+            }
+
+            if (hours < 10) {
+                hourString = " " + hours;
+            }
+            else {
+                hourString = Integer.toString( hours );
+            }
+
+            String time = hourString + ":" + minuteString;
+
+            float textCenterX = (canvas.getHeight() / 7.5f);
+            float textCenterY = (canvas.getWidth() / 2.25f);
+            canvas.drawText( time, textCenterX, textCenterY, mDigitalStrokePaint );
+            canvas.drawText( time, textCenterX, textCenterY, mDigitalTimePaint );
 
             /*
              * Draw ticks. Usually you will want to bake this directly into the photo, but in
@@ -442,6 +496,7 @@ public class MyWatchFace extends CanvasWatchFaceService
             canvas.save();
 
             canvas.rotate( hoursRotation, mCenterX, mCenterY );
+
             canvas.drawLine(
                     mCenterX,
                     mCenterY - CENTER_GAP_AND_CIRCLE_RADIUS,
