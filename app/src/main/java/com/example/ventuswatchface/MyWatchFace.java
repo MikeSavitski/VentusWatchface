@@ -30,18 +30,6 @@ import java.util.Calendar;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-/**
- * Analog watch face with a ticking second hand. In ambient mode, the second hand isn't
- * shown. On devices with low-bit ambient mode, the hands are drawn without anti-aliasing in ambient
- * mode. The watch face is drawn with less contrast in mute mode.
- * <p>
- * Important Note: Because watch face apps do not have a default Activity in
- * their project, you will need to set your Configurations to
- * "Do not launch Activity" for both the Wear and/or Application modules. If you
- * are unsure how to do this, please review the "Run Starter project" section
- * in the Google Watch Face Code Lab:
- * https://codelabs.developers.google.com/codelabs/watchface/index.html#0
- */
 public class MyWatchFace extends CanvasWatchFaceService
 {
 
@@ -215,6 +203,11 @@ public class MyWatchFace extends CanvasWatchFaceService
                 mDigitalTimePaint.setColor( Color.BLACK );
                 mDigitalStrokePaint.setColor( Color.WHITE );
             }
+            else
+            {
+                mDigitalTimePaint.setColor( Color.rgb( 0, 0,0 ) );
+                mDigitalStrokePaint.setColor( Color.rgb( 157, 200,109 ) );
+            }
         }
 
         @Override
@@ -295,9 +288,6 @@ public class MyWatchFace extends CanvasWatchFaceService
                     break;
                 case TAP_TYPE_TAP:
                     // The user has completed the tap gesture.
-                    // TODO: Add code to handle the tap gesture.
-                    Toast.makeText( getApplicationContext(), R.string.message, Toast.LENGTH_SHORT )
-                            .show();
                     break;
             }
             invalidate();
@@ -318,11 +308,11 @@ public class MyWatchFace extends CanvasWatchFaceService
 
             if ( mAmbient && ( mLowBitAmbient || mBurnInProtection ) )
             {
-                canvas.drawColor( Color.BLACK );
+                canvas.drawBitmap( mBackgroundAmbientBitmap, 0, 0, mBackgroundPaint );
             }
             else if ( mAmbient )
             {
-                canvas.drawBitmap( mGrayBackgroundBitmap, 0, 0, mBackgroundPaint );
+                canvas.drawBitmap( mBackgroundAmbientBitmap, 0, 0, mBackgroundPaint );
             }
             else
             {
@@ -332,6 +322,8 @@ public class MyWatchFace extends CanvasWatchFaceService
 
         private void drawWatchFace( Canvas canvas )
         {
+            //TODO: Fix centering/scaling of text
+
             int hours = mCalendar.get( Calendar.HOUR );
             int minutes = mCalendar.get( Calendar.MINUTE );
             String hourString = "";
@@ -353,7 +345,7 @@ public class MyWatchFace extends CanvasWatchFaceService
 
             String time = hourString + ":" + minuteString;
 
-            float textCenterX = (canvas.getHeight() / 7.5f);
+            float textCenterX = (canvas.getHeight() / 9.5f);
             float textCenterY = (canvas.getWidth() / 2.25f);
             canvas.drawText( time, textCenterX, textCenterY, mDigitalStrokePaint );
             canvas.drawText( time, textCenterX, textCenterY, mDigitalTimePaint );
