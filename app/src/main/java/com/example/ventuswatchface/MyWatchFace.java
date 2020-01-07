@@ -23,7 +23,6 @@ import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
 import android.view.SurfaceHolder;
-import android.widget.Toast;
 
 import java.lang.ref.WeakReference;
 import java.util.Calendar;
@@ -77,13 +76,6 @@ public class MyWatchFace extends CanvasWatchFaceService
 
     private class Engine extends CanvasWatchFaceService.Engine
     {
-        private static final float HOUR_STROKE_WIDTH        = 5f;
-        private static final float MINUTE_STROKE_WIDTH      = 3f;
-        private static final float SECOND_TICK_STROKE_WIDTH = 2f;
-
-        private static final float CENTER_GAP_AND_CIRCLE_RADIUS = 4f;
-
-        private static final int SHADOW_RADIUS = 6;
         /* Handler to update the time once a second in interactive mode. */
         private final Handler mUpdateTimeHandler = new EngineHandler( this );
         private Calendar mCalendar;
@@ -322,8 +314,6 @@ public class MyWatchFace extends CanvasWatchFaceService
 
         private void drawWatchFace( Canvas canvas )
         {
-            //TODO: Fix centering/scaling of text
-
             int hours = mCalendar.get( Calendar.HOUR );
             int minutes = mCalendar.get( Calendar.MINUTE );
             String hourString = "";
