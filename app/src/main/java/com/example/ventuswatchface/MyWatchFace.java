@@ -336,7 +336,10 @@ public class MyWatchFace extends CanvasWatchFaceService
                 minuteString = Integer.toString( minutes );
             }
 
-            if (hours < 10) {
+            if (hours == 0) {
+                hourString = "12";
+            }
+            else if (hours < 10) {
                 hourString = " " + hours;
             }
             else {
@@ -345,11 +348,12 @@ public class MyWatchFace extends CanvasWatchFaceService
 
             String time = hourString + ":" + minuteString;
 
-            float textCenterX = (canvas.getHeight() / 9.5f);
-            float textCenterY = (canvas.getWidth() / 2.25f);
+            float textCenterX = (canvas.getWidth() / 8.0f);
+            float textCenterY = (canvas.getHeight() / 2.25f);
+            mDigitalTimePaint.setTextSize( Math.round( canvas.getHeight() / 4.571429 ) );
+            mDigitalStrokePaint.setTextSize( Math.round( canvas.getHeight() / 4.571429 ) );
             canvas.drawText( time, textCenterX, textCenterY, mDigitalStrokePaint );
             canvas.drawText( time, textCenterX, textCenterY, mDigitalTimePaint );
-
         }
 
         @Override
