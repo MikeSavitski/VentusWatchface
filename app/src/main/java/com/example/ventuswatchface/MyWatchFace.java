@@ -15,7 +15,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.graphics.Palette;
+import androidx.palette.graphics.Palette;
 import android.support.wearable.watchface.CanvasWatchFaceService;
 import android.support.wearable.watchface.WatchFaceService;
 import android.support.wearable.watchface.WatchFaceStyle;
@@ -146,7 +146,7 @@ public class MyWatchFace extends CanvasWatchFaceService
         {
             mBackgroundPaint = new Paint();
             mBackgroundPaint.setColor( Color.BLACK );
-            mBackgroundBitmap = BitmapFactory.decodeResource( getResources(), R.drawable.bg );
+            mBackgroundBitmap = BitmapFactory.decodeResource( getResources(), R.drawable.ventus );
 
             /* Extracts colors from background image to improve watchface style. */
             Palette.from( mBackgroundBitmap ).generate( new Palette.PaletteAsyncListener()
